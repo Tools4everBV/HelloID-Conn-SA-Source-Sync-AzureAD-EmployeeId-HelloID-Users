@@ -86,7 +86,7 @@ The following settings are required to connect to the API.
 | HelloIDUserInclusionFilter  | Wildcard value to include HelloID users in the sync (note: only 1 filter should be used, either the include or exclude, not both!)  |  test_   |
 | AADtenantID | Id of the Azure tenant | 	12ab345c-0c41-4cde-9908-dabf3cad26b6   |
 | AADAppId  | Id of the Azure app  |   12ab123c-fe99-4bdc-8d2e-87405fdb2379   |
-| AADAppSecret   |  Secret of the Azure app  |   AB01C~DeFgHijkLMN.k~11AVdZSRzVnltkPqr   |
+| AADAppSecret   |  Secret of the Azure app  |   AB01C~DeFgHijkLMN.k-11AVdZSRzVnltkPqr   |
 | AADUserExclusionFilter  | Wildcard value to exclude AzureAD users in the sync (note: only 1 filter should be used, either the include or exclude, not both!) |   "#EXT#"   |
 | AADUserInclusionFilter  | Wildcard value to include AzureAD users in the sync (note: only 1 filter should be used, either the include or exclude, not both!)  |  test_   |
 
