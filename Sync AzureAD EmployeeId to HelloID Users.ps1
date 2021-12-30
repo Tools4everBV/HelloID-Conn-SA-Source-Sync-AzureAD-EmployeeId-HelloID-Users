@@ -608,6 +608,11 @@ try{
 Try{
     $azureUsers = [PSCustomObject]::new()
     Get-AzureUsers -AccessToken $azureAccessToken -InclusionFilter $AADUserInclusionFilter -ExclusionFilter $AADUserExclusionFilter -Response ([Ref]$azureUsers) -Logging:$false
+
+    $azureUserHashtable = @{}
+    foreach($azureUser in $azureUsers){
+        $azureUserHashtable += @{$azureUser.userPRincipalName = $azureUser}
+    }
 }catch{
     throw $_
 }
@@ -646,36 +651,26 @@ try{
 if($hidUsers.Username.Count -gt 0){
     Hid-Write-Status -Message "Comparing [$($hidUsers.Username.Count)] HelloID users for changes.." -Event Warning
 }
-foreach($azureUser in $azureUsers){
+
+foreach($hidUser in $hidUsers){
     try{
         $userObject = [Ordered]@{
-            Username = $azureUser.UserPrincipalName
-            EmployeeId = $azureUser.EmployeeId
-        }
-        $userObjectTemp = $userObject
-
-        $userObject = @{}
-        foreach($key in $userObjectTemp.keys){
-            if(![string]::IsNullOrEmpty($userObjectTemp.$key)){
-                $null = $userObject.Add("$key", $($userObjectTemp.$key))
-            }
+            Username = $hidUser.UserName
+            EmployeeId = $azureUserHashtable[$hidUser.UserName].EmployeeId
+            IsEnabled = $hidUser.isEnabled
         }
 
-        if($userObject.Username -notin $hidUsers.userName){
-            Hid-Write-Status -Message "Skipping update for $($userObject.Username). Username not found in HelloID" -Event Success
-        }else{
-            $userChanged = [PSCustomObject]::new()
-            Compare-HIDUserData -HidUser $hidUserHashtable[$userObject.Username] -UserDataToCheck $userObject -Response ([Ref]$userChanged) -Logging:$false
+        $userChanged = [PSCustomObject]::new()
+        Compare-HIDUserData -HidUser $hidUserHashtable[$userObject.Username] -UserDataToCheck $userObject -Response ([Ref]$userChanged) -Logging:$false
 
-            if($userChanged -eq $true){
-                $userObject.Add('UserGUID', $hidUserHashtable[$userObject.Username].UserGUID)
+        if($userChanged -eq $true){
+            $userObject.Add('UserGUID', $hidUserHashtable[$userObject.Username].UserGUID)
 
-                $null = $hidUsersToUpdate.Add($userObject)
+            $null = $hidUsersToUpdate.Add($userObject)
 
-                $updatedHidUser = [PSCustomObject]::new()
-                Update-HIDUser @userObject -PortalBaseUrl $portalBaseUrl -Headers $headers -Response ([Ref]$updatedHidUser) -Logging:$false
-                $updateSuccess++
-            }
+            $updatedHidUser = [PSCustomObject]::new()
+            Update-HIDUser @userObject -PortalBaseUrl $portalBaseUrl -Headers $headers -Response ([Ref]$updatedHidUser) -Logging:$false
+            $updateSuccess++
         }
     }catch{
         $updateFailed++
@@ -700,4 +695,4 @@ if($hidUsersToUpdate.username.Count -gt 0){
     Hid-Write-Summary -Message "There were no HelloID users updated, check the Progress for more details" -Event Success
 }
 
-Hid-Write-Summary -Message "Finished synchronizing [$($azureUsers.userPrincipalName.Count)] Azure AD users to HelloID users" -Event Success
+Hid-Write-Summary -Message "Finished synchronizing EmployeeId from Azure for [$($hidUsers.UserName.Count)] HelloID users" -Event Success
