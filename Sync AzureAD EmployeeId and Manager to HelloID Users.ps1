@@ -500,7 +500,7 @@ function Update-HIDUser{
 
         foreach($inputKey in $Attributes.Keys){
             if(![string]::IsNullOrEmpty($Attributes.$inputKey)){
-                if($inputKey -eq "phoneNumber" -or $inputKey -eq "employeeId" -or $inputKey -eq "samAccountName" -or $inputKey -eq "managedByUserGUID" ){
+                if($inputKey -eq "phoneNumber" -or $inputKey -eq "employeeId" -or $inputKey -eq "samAccountName"){
                     if($userBody.userAttributes){
                         $userBody.userAttributes += @{
                             "$inputKey" = $Attributes.$inputKey
@@ -568,7 +568,7 @@ function Compare-HIDUserData{
                             $userChanged = $true
                         }
                     }
-                }elseif($key -eq "PhoneNumber" -or $key -eq "EmployeeId" -or $key -eq "SamAccountName" -or $key -eq "managedByUserGUID"){
+                }elseif($key -eq "PhoneNumber" -or $key -eq "EmployeeId" -or $key -eq "SamAccountName"){
                     if($UserDataToCheck.$key -notlike $HidUser.userAttributes.$key){
                         $userChanged = $true
                     }
